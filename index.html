@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>サキガケ１頁小説</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
 body{
@@ -53,33 +54,31 @@ button{
     background:#f8f3e6;
     padding:20px;
     position:relative;
-    overflow:hidden;
 }
 
-.watermark{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%, -50%);
-    width:400px;
-    height:400px;
-    pointer-events:none;
-    opacity:0.15;
-    z-index:0;
-}
+.watermark {
+    position: absolute;
 
-.watermark img{
-    width:100%;
-    height:100%;
-    object-fit:contain;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 400px;     /* ← サイズ調整はここ */
+    height: 400px;
+
+    background-image: url("logo.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+
+    pointer-events: none;
+    z-index: 0;
 }
 
 .header{
     height:40px;
     text-align:center;
     font-size:16px;
-    position:relative;
-    z-index:1;
 }
 
 .inner{
@@ -95,8 +94,6 @@ button{
         "Hiragino Mincho ProN",
         "MS PMincho",
         serif;
-    position:relative;
-    z-index:1;
 }
 
 .footer{
@@ -105,7 +102,6 @@ button{
     width:100%;
     text-align:center;
     font-size:12px;
-    z-index:1;
 }
 
 ruby{
@@ -131,9 +127,7 @@ placeholder="作品名">
 </div>
 
 <div class="page">
-<div class="watermark">
-    <img src="logo.png" id="logoImg">
-</div>
+<div class="watermark"></div>
 
 <div class="header">
 <span id="titleText">作品名</span>
@@ -170,6 +164,7 @@ input.addEventListener("input",()=>{
     text = text.replace(/\n/g,"<br>");
     output.innerHTML = text;
 
+    // ▼ 縦書きなので幅方向を見る
     if(pageInner.scrollWidth > pageInner.clientWidth){
         input.classList.add("over");
     }else{
@@ -188,39 +183,20 @@ document.getElementById("rubyBtn").addEventListener("click",()=>{
 });
 
 /* JPG保存 */
-function saveAsJPG() {
+function saveAsJPG(){
     const page = document.querySelector(".page");
-    const logo = document.getElementById("logoImg");
 
-    const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${page.offsetWidth}" height="${page.offsetHeight}">
-        <foreignObject width="100%" height="100%">
-            ${new XMLSerializer().serializeToString(page)}
-        </foreignObject>
-    </svg>`;
-
-    const blob = new Blob([svg], {type:"image/svg+xml;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-
-    const img = new Image();
-    img.onload = function(){
-        const canvas = document.createElement("canvas");
-        canvas.width = page.offsetWidth * 3;
-        canvas.height = page.offsetHeight * 3;
-        const ctx = canvas.getContext("2d");
-
-        ctx.scale(3,3);
-        ctx.drawImage(img,0,0);
-
-        URL.revokeObjectURL(url);
-
-        const link = document.createElement("a");
-        link.download = "sakigake1p.jpg";
-        link.href = canvas.toDataURL("image/jpeg",0.98);
+    html2canvas(page,{
+        scale:3,
+        backgroundColor:null,
+        useCORS:true,
+        letterRendering:true
+    }).then(canvas=>{
+        const link=document.createElement("a");
+        link.download="sakigake1p.jpg";
+        link.href=canvas.toDataURL("image/jpeg",0.98);
         link.click();
-    };
-
-    img.src = url;
+    });
 }
 </script>
 
