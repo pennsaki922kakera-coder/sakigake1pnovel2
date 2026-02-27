@@ -132,7 +132,7 @@ placeholder="作品名">
 
 <div class="page">
 <div class="watermark">
-    
+    <img src="logo.png" id="logoImg">
 </div>
 
 <div class="header">
@@ -202,19 +202,22 @@ function saveAsJPG() {
     const blob = new Blob([svg], {type:"image/svg+xml;charset=utf-8"});
     const url = URL.createObjectURL(blob);
 
-   const img = new Image();
-img.crossOrigin = "anonymous";
-img.src = "logo.png";
+    const img = new Image();
+    img.onload = function(){
+        const canvas = document.createElement("canvas");
+        canvas.width = page.offsetWidth * 3;
+        canvas.height = page.offsetHeight * 3;
+        const ctx = canvas.getContext("2d");
 
-img.onload = function () {
-    ctx.drawImage(img, x, y, w, h);
+        ctx.scale(3,3);
+        ctx.drawImage(img,0,0);
 
-    const dataURL = canvas.toDataURL("image/jpeg");
-    const link = document.createElement("a");
-    link.href = dataURL;
-    link.download = "novel.jpg";
-    link.click();
-};
+        URL.revokeObjectURL(url);
+
+        const link = document.createElement("a");
+        link.download = "sakigake1p.jpg";
+        link.href = canvas.toDataURL("image/jpeg",0.98);
+        link.click();
     };
 
     img.src = url;
