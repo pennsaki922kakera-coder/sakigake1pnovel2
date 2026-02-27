@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <meta charset="UTF-8">
 <title>サキガケ１頁小説</title>
 
@@ -15,7 +17,7 @@ body {
     font-family: serif;
 }
 
-/* 外枠（サイズは固定） */
+/* 外枠（サイズ固定） */
 .page {
     width: 420px;
     height: 600px;
@@ -24,26 +26,50 @@ body {
     position: relative;
 }
 
+/* ===== 中央透かしロゴ ===== */
+.watermark {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 400px;     /* ← サイズ調整はここ */
+    height: 400px;
+
+    background-image: url("logo.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+
+    pointer-events: none;
+    z-index: 0;
+}
+
 /* ヘッダー */
 .header {
     height: 40px;
     text-align: center;
     writing-mode: horizontal-tb;
     font-size: 16px;
+    position: relative;
+    z-index: 1;
 }
 
-/* ★ 内側の隠しページ */
+/* 本文エリア */
 .inner {
     width: 400px;
-    height: 500px;   /* ← ヘッダー分40px引いた */
+    height: 500px;
     overflow: hidden;
-    background-color: #f8f3e6;
     box-sizing: border-box;
+
     writing-mode: vertical-rl;
     font-size: 15px;
     line-height: 1.2;
     letter-spacing: 1px;
+
     position: relative;
+    z-index: 1;
 }
 
 /* フッター */
@@ -55,9 +81,11 @@ body {
     text-align: center;
     writing-mode: horizontal-tb;
     font-size: 12px;
+    z-index: 1;
 }
 </style>
 </head>
+
 <body>
 
 <div style="display:flex; gap:40px; align-items:flex-start;">
@@ -72,23 +100,32 @@ body {
         <input type="text" id="titleInput"
           style="width:300px; font-size:15px; margin-top:10px;"
           placeholder="作品名を入力">
+<button onclick="saveAsJPG()" 
+style="width:300px; margin-top:10px;">
+JPG保存
+</button>
 
     </div>
 
     <!-- 文庫ページ -->
     <div class="page">
 
+        <!-- 透かしロゴ -->
+        <div class="watermark"></div>
 
+        <!-- タイトル表示 -->
         <div class="header">
             <span id="titleText">作品名</span>
         </div>
 
+        <!-- 本文 -->
         <div class="inner">
             <div id="novelText">
                 ここに小説が表示されます。
             </div>
         </div>
 
+        <!-- フッター -->
         <div class="footer">
             ペン先の欠片
         </div>
@@ -111,6 +148,20 @@ const titleText = document.getElementById("titleText");
 titleInput.addEventListener("input", function() {
     titleText.textContent = this.value;
 });
+function saveAsJPG() {
+    const page = document.querySelector(".page");
+
+    html2canvas(page, {
+        backgroundColor: null,
+        scale: 2   // 解像度アップ（重要）
+    }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "sakigake1p.jpg";
+        link.href = canvas.toDataURL("image/jpeg", 0.95);
+        link.click();
+    });
+}
+
 </script>
 
 </body>
